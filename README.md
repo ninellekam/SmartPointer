@@ -3,7 +3,7 @@
 
 ## Framework:
 - Constructor
-- Destuctor
+- Destructor
 - Operator =
 - Function for deleting the link
 - Function for get value
