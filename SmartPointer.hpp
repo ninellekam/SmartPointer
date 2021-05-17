@@ -2,17 +2,15 @@
 #define SMARTPOINTER_HPP
 
 template <class T> class SmartPointer {
-	T* ref;
-	unsigned* ref_count;
+	T* ref{nullptr};
+	unsigned* ref_count{nullptr};
 public:
 	SmartPointer(T * ptr) {
-		ref = ptr;
-		ref_count = (unsigned *)malloc(sizeof(unsigned));
-		*ref_count = 1;
+		reset(ptr);
 	}
 
 	SmartPointer(SmartPointer<T> & sptr) {
-		red = sptr.ref;
+		ref = sptr.ref;
 		ref_count = sptr.ref_count;
 		++(*ref_count);
 	}
@@ -21,7 +19,7 @@ public:
 		if (this == &sptr)
 			return *this;
 
-		if (*ref_count > 0)
+		if (ref_count && *ref_count > 0)
 			remove();
 
 		ref = sptr.ref;
@@ -34,8 +32,31 @@ public:
 		remove();
 	}
 
+	void reset() noexcept {
+		remove();
+	}
+
+	template <class U>
+	void reset(U* p) {
+    if (ref) {
+      remove();
+    }
+		ref = p;
+    ref_count = static_cast<unsigned int*>(::operator new(sizeof(unsigned)));
+		*ref_count = 1;
+	}
+
+
 	T getValue() {
 		return *ref;
+	}
+
+	T & operator*() const noexcept {
+		return *ref;
+	}
+
+	T* operator->() const noexcept {
+		return ref;
 	}
 
 protected:
@@ -43,9 +64,9 @@ protected:
 		--(*ref_count);
 		if (*ref_count == 0) {
 			delete ref;
-			free(ref_count);
-			ref = NULL;
-			red_count = NULL;
+			delete ref_count;
+			ref = nullptr;
+			ref_count = nullptr;
 		}
 	}
 };
